@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
 /* appearance */
-static const char font[]            = "Sans 8";
+static const char font[]            = "-*-terminus-medium-r-*-*-16-*-*-*-*-*-*-*";
 static const char normbordercolor[] = "#444444";
 static const char normbgcolor[]     = "#222222";
 static const char normfgcolor[]     = "#bbbbbb";
@@ -15,13 +15,14 @@ static const Bool showsystray       = True;     /* False means no systray */
 static const Bool showbar           = True;     /* False means no bar */
 static const Bool topbar            = True;     /* False means bottom bar */
 
-/* False means using the scroll wheel on a window will not change focus */
-static const Bool focusonwheelscroll = False;
-
 /* tagging */
 static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
 static const Rule rules[] = {
+	/* xprop(1):
+	 *	WM_CLASS(STRING) = instance, class
+	 *	WM_NAME(STRING) = title
+	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
 	{ "Gimp",     NULL,       NULL,       0,            True,        -1 },
 	{ "Firefox",  NULL,       NULL,       1 << 8,       False,       -1 },
@@ -51,8 +52,11 @@ static const Layout layouts[] = {
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
-static const char *dmenucmd[] = { "dmenu_run", "-fn", font, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, NULL };
-static const char *termcmd[]  = { "uxterm", NULL };
+static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
+static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", font, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, NULL };
+static const char *termcmd[]  = { "st", NULL };
+
+#include "mpdcontrol.c"
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -89,33 +93,9 @@ static Key keys[] = {
 	TAGKEYS(                        XK_8,                      7)
 	TAGKEYS(                        XK_9,                      8)
 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
-
-	{ MODKEY,                       XK_KP_7,   explace,                {.ui = EX_NW }},
-	{ MODKEY,                       XK_KP_8,   explace,                {.ui = EX_N  }},
-	{ MODKEY,                       XK_KP_9,   explace,                {.ui = EX_NE }},
-	{ MODKEY,                       XK_KP_4,   explace,                {.ui = EX_W  }},
-	{ MODKEY,                       XK_KP_5,   explace,                {.ui = EX_C  }},
-	{ MODKEY,                       XK_KP_6,   explace,                {.ui = EX_E  }},
-	{ MODKEY,                       XK_KP_1,   explace,                {.ui = EX_SW }},
-	{ MODKEY,                       XK_KP_2,   explace,                {.ui = EX_S  }},
-	{ MODKEY,                       XK_KP_3,   explace,                {.ui = EX_SE }},
-
-	{ MODKEY|ShiftMask,             XK_KP_8,   exresize,               {.v = (int []){   0,  25 }}},
-	{ MODKEY|ShiftMask,             XK_KP_2,   exresize,               {.v = (int []){   0, -25 }}},
-	{ MODKEY|ShiftMask,             XK_KP_6,   exresize,               {.v = (int []){  25,   0 }}},
-	{ MODKEY|ShiftMask,             XK_KP_4,   exresize,               {.v = (int []){ -25,   0 }}},
-	{ MODKEY|ShiftMask,             XK_KP_5,   exresize,               {.v = (int []){  25,  25 }}},
-	{ MODKEY|ShiftMask|ControlMask, XK_KP_5,   exresize,               {.v = (int []){ -25, -25 }}},
-
-	{ MODKEY|ControlMask,           XK_KP_6,   togglehorizontalexpand, {.i = +1} },
-	{ MODKEY|ControlMask,           XK_KP_3,   togglehorizontalexpand, {.i =  0} },
-	{ MODKEY|ControlMask,           XK_KP_4,   togglehorizontalexpand, {.i = -1} },
-	{ MODKEY|ControlMask,           XK_KP_8,   toggleverticalexpand,   {.i = +1} },
-	{ MODKEY|ControlMask,           XK_KP_1,   toggleverticalexpand,   {.i =  0} },
-	{ MODKEY|ControlMask,           XK_KP_2,   toggleverticalexpand,   {.i = -1} },
-	{ MODKEY|ControlMask,           XK_KP_9,   togglemaximize,         {.i = -1} },
-	{ MODKEY|ControlMask,           XK_KP_7,   togglemaximize,         {.i = +1} },
-	{ MODKEY|ControlMask,           XK_KP_5,   togglemaximize,         {.i =  0} },
+	{ MODKEY,                       XK_F1,     mpdchange,      {.i = -1} },
+	{ MODKEY,                       XK_F2,     mpdchange,      {.i = +1} },
+	{ MODKEY,                       XK_Escape, mpdcontrol,     {0} },
 };
 
 /* button definitions */
